@@ -1,0 +1,37 @@
+{
+  "name": "goedemiddag/laravel-autodiscovery-lock",
+  "description": "Creates a lock file containing all the packages which are auto-discovered by Laravel.",
+  "version": "0.0.1",
+  "keywords": [
+    "laravel",
+    "autodiscovery",
+    "lock",
+    "service provider",
+    "alias"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Silvano Allemekinders",
+      "email": "silvano@goedemiddag.nl"
+    }
+  ],
+  "require": {
+    "php": "^7.4 || ^8.0",
+    "laravel/framework": "^8.0 || ^9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Goedemiddag\\AutodiscoveryLock\\": "src"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Goedemiddag\\AutodiscoveryLock\\Autodiscovery\\AutodiscoveryLockServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
