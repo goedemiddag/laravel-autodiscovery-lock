@@ -7,30 +7,29 @@ use Illuminate\Console\Command;
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\Collection;
 
-class AutodiscoverPackageLock extends Command
+class AutodiscoveryPackageLock extends Command
 {
     protected $signature = 'autodiscovery:generate-lock';
     protected $description = 'Generate a lock file for all autodiscovered packages';
-
-    private const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
 
     private PackageManifest $packageManifest;
 
     public function __construct(PackageManifest $manifest)
     {
+        parent::__construct();
+
         $this->packageManifest = new LaravelPackageManifest(
             $manifest->files,
             $manifest->basePath,
             $manifest->manifestPath
         );
-
-        parent::__construct();
     }
 
     public function handle()
     {
         try {
-            $collection = $this->collectManifest();
+            $collection = $this->packageManifest->collectManifestFromComposerAutoload();
+
             $this->writeLockfileToDisk($collection);
             $this->info('Autodiscovery lock file generated.');
 
@@ -42,23 +41,10 @@ class AutodiscoverPackageLock extends Command
         }
     }
 
-    private function collectManifest(): Collection
-    {
-        $manifest = $this->packageManifest->getManifest();
-
-        if (is_iterable($manifest) === false || count($manifest)  === 0) {
-            throw new \Exception('No packages found in the manifest.');
-        }
-
-        return collect([
-                'autodiscovered_packages' => $this->packageManifest->getManifest(),
-            ]);
-    }
-
     private function writeLockfileToDisk(Collection $collection): void
     {
         $this->packageManifest->files->replace(
-            $this->packageManifest->basePath . DIRECTORY_SEPARATOR . self::PACKAGE_LOCK_FILE,
+            $this->packageManifest->getLockFilePath(),
             $collection->toJson(JSON_PRETTY_PRINT)
         );
     }
