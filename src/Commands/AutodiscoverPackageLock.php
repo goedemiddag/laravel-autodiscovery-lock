@@ -5,47 +5,56 @@ namespace Goedemiddag\AutodiscoveryLock\Commands;
 use Goedemiddag\AutodiscoveryLock\Autodiscovery\LaravelPackageManifest;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\PackageManifest;
+use Illuminate\Support\Collection;
 
 class AutodiscoverPackageLock extends Command {
-    const PACKAGE_LOCK_FILE = 'autodisovery.lock';
-
-    protected $signature = 'autodiscovery:lock-generate';
+    protected $signature = 'autodiscovery:generate-lock';
     protected $description = 'Generate a lock file for all autodiscovered packages';
-    private $packageManifest;
+
+    private const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
+
+    private PackageManifest $packageManifest;
 
     public function __construct(PackageManifest $manifest) {
-        $this->packageManifest = new LaravelPackageManifest($manifest->files, $manifest->basePath, $manifest->manifestPath);
+        $this->packageManifest = new LaravelPackageManifest(
+            $manifest->files,
+            $manifest->basePath,
+            $manifest->manifestPath
+        );
 
         parent::__construct();
     }
 
     public function handle() {
-
         try {
-            $manifest = $this->packageManifest->getManifest();
+            $collection = $this->collectManifest();
+            $this->writeLockfileToDisk($collection);
+            $this->info('Autodiscovery lock file generated.');
 
-            if (is_iterable($manifest) === false || count($manifest)  === 0) {
-                throw new \Exception('No packages found in the manifest.');
-            }
+            return self::SUCCESS;
         } catch (\Exception $e) {
             $this->error('Could not generate lock file: ' . $e->getMessage());
 
-            return 1;
+            return self::FAILURE;
+        }
+    }
+
+    private function collectManifest(): Collection {
+        $manifest = $this->packageManifest->getManifest();
+
+        if (is_iterable($manifest) === false || count($manifest)  === 0) {
+            throw new \Exception('No packages found in the manifest.');
         }
 
-        $collection = collect(
-            [
+        return collect([
                 'autodiscovered_packages' => $this->packageManifest->getManifest(),
-            ]
-		);
+            ]);
+    }
 
+    private function writeLockfileToDisk(Collection $collection): void {
         $this->packageManifest->files->replace(
             $this->packageManifest->basePath . DIRECTORY_SEPARATOR . self::PACKAGE_LOCK_FILE,
             $collection->toJson(JSON_PRETTY_PRINT)
         );
-
-        $this->info('Autodiscovery lock file generated.');
-
-        return 0;
     }
 }

@@ -1,6 +1,6 @@
 # Laravel autodiscovery lock
 
-This package allows you to monitor the autodiscovery of your Laravel application. By running the supplied command in the 
+This package allows you to monitor the [autodiscovery of your Laravel application](https://github.com/goedemiddag/laravel-autodiscovery-lock). By running the supplied command in the 
 post-autoload-dump event, you can generate a file that contains all the autodiscovered packages.  This file can then be used to check for unacknowledged autodiscoveries.
 
 ## Installation
@@ -17,7 +17,7 @@ It should look something like this:
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
-            "@php artisan autodiscovery:lock-generate"
+            "@php artisan autodiscovery:generate-lock"
         ]
     }
 }
@@ -26,7 +26,7 @@ It should look something like this:
 ## Usage
 To generate the first autodiscovery lock file, run the following command:
 ```bash
-php artisan autodiscovery:lock-generate
+php artisan autodiscovery:generate-lock
 ```
 
 This will generate a file called `autodiscovery.lock` in the root of your project. This file contains all the autodiscovered packages and which providers / aliases they provide.
