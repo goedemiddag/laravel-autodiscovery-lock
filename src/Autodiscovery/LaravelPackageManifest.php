@@ -6,7 +6,8 @@ use Illuminate\Filesystem\Filesystem;
 
 class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
 {
-    public function getManifest(): array {
+    public function getManifest(): array
+    {
         return parent::getManifest();
     }
 }

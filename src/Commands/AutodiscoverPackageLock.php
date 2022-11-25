@@ -7,7 +7,8 @@ use Illuminate\Console\Command;
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\Collection;
 
-class AutodiscoverPackageLock extends Command {
+class AutodiscoverPackageLock extends Command
+{
     protected $signature = 'autodiscovery:generate-lock';
     protected $description = 'Generate a lock file for all autodiscovered packages';
 
@@ -15,7 +16,8 @@ class AutodiscoverPackageLock extends Command {
 
     private PackageManifest $packageManifest;
 
-    public function __construct(PackageManifest $manifest) {
+    public function __construct(PackageManifest $manifest)
+    {
         $this->packageManifest = new LaravelPackageManifest(
             $manifest->files,
             $manifest->basePath,
@@ -25,7 +27,8 @@ class AutodiscoverPackageLock extends Command {
         parent::__construct();
     }
 
-    public function handle() {
+    public function handle()
+    {
         try {
             $collection = $this->collectManifest();
             $this->writeLockfileToDisk($collection);
@@ -39,7 +42,8 @@ class AutodiscoverPackageLock extends Command {
         }
     }
 
-    private function collectManifest(): Collection {
+    private function collectManifest(): Collection
+    {
         $manifest = $this->packageManifest->getManifest();
 
         if (is_iterable($manifest) === false || count($manifest)  === 0) {
@@ -51,7 +55,8 @@ class AutodiscoverPackageLock extends Command {
             ]);
     }
 
-    private function writeLockfileToDisk(Collection $collection): void {
+    private function writeLockfileToDisk(Collection $collection): void
+    {
         $this->packageManifest->files->replace(
             $this->packageManifest->basePath . DIRECTORY_SEPARATOR . self::PACKAGE_LOCK_FILE,
             $collection->toJson(JSON_PRETTY_PRINT)
