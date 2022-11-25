@@ -47,3 +47,8 @@ Just run the command in the pipeline for your Pull Requests, and/or run the comm
 
 ## Pipeline examples
 TBD
+
+## Credits 
+- [Bonroyage](https://github.com/bonroyage) - For helping out with the initial implementation.
+- [NiekKeijzer](https://github.com/NiekKeijzer) - For reviewing the code for the initial implementation.
+- [All Contributors](https://github.com/goedemiddag/laravel-autodiscovery-lock/graphs/contributors)
