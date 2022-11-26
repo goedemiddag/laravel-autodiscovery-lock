@@ -6,35 +6,32 @@ use Illuminate\Support\Collection;
 
 final class AutodiscoveryLockResolver
 {
+    public const NOT_IN_LOCK = 'notInLock';
+    public const NOT_IN_AUTOLOAD = 'notInAutoload';
     public function resolve(LaravelPackageManifest $manifest): Collection
     {
-        $mismatches = new Collection();
         $autoload = $manifest->collectManifestFromComposerAutoload();
         $lock = $manifest->collectManifestFromLock();
 
-        $this->resolveAllFilesInAutoloadAreInLock($lock, $autoload, $mismatches);
-        $this->resolveAllFilesInLockAreInAutoload($lock, $autoload, $mismatches);
-
-        return $mismatches;
+        return collect(
+            [
+                self::NOT_IN_LOCK => $this->getClassesInAutoloadMissingFromLockfile($lock, $autoload),
+                self::NOT_IN_AUTOLOAD => $this->getClassesInLockfileMissingFromAutoload($lock, $autoload),
+            ]
+        );
     }
 
-    private function resolveAllFilesInLockAreInAutoload(
+    public function getClassesInLockfileMissingFromAutoload(
         Collection $lockCollection,
         Collection $autoloadCollection,
-        Collection $mismatches
-    ): void {
-        $lockCollection->flatten()->diff($autoloadCollection->flatten())->each(function ($item) use ($mismatches) {
-            $mismatches->add($item . ' is found in the lock file but not in the autodiscovered packages.');
-        });
+    ): Collection {
+        return $lockCollection->flatten()->diff($autoloadCollection->flatten());
     }
 
-    private function resolveAllFilesInAutoloadAreInLock(
+    public function getClassesInAutoloadMissingFromLockfile(
         Collection $lockCollection,
         Collection $autoloadCollection,
-        Collection $mismatches
-    ): void {
-        $autoloadCollection->flatten()->diff($lockCollection->flatten())->each(function ($item) use ($mismatches) {
-            $mismatches->add($item . ' is found in the autodiscovered packages but not in the lock file.');
-        });
+    ): Collection {
+        return $autoloadCollection->flatten()->diff($lockCollection->flatten());
     }
 }
