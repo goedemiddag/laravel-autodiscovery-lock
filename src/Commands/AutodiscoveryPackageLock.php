@@ -12,7 +12,7 @@ class AutodiscoveryPackageLock extends Command
     protected $signature = 'autodiscovery:generate-lock';
     protected $description = 'Generate a lock file for all autodiscovered packages';
 
-    private PackageManifest $packageManifest;
+    private LaravelPackageManifest $packageManifest;
 
     public function __construct(PackageManifest $manifest)
     {

@@ -2,6 +2,7 @@
 
 namespace Goedemiddag\AutodiscoveryLock\Commands;
 
+use Goedemiddag\AutodiscoveryLock\Autodiscovery\AutodiscoveryLockResolver;
 use Goedemiddag\AutodiscoveryLock\Autodiscovery\LaravelPackageManifest;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\PackageManifest;
@@ -12,12 +13,11 @@ class AutodiscoveryPackageLockVerify extends Command
     protected $signature = 'autodiscovery:verify-lock';
     protected $description = 'verify that the lockfile on disk is the same as the autodiscovered packages';
 
-    private const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
-
-    private PackageManifest $packageManifest;
+    private LaravelPackageManifest $packageManifest;
+    private AutodiscoveryLockResolver $resolver;
     private Collection  $warningMessages;
 
-    public function __construct(PackageManifest $manifest)
+    public function __construct(PackageManifest $manifest, AutodiscoveryLockResolver $resolver)
     {
         parent::__construct();
 
@@ -26,52 +26,35 @@ class AutodiscoveryPackageLockVerify extends Command
             $manifest->basePath,
             $manifest->manifestPath
         );
+        $this->resolver = $resolver;
         $this->warningMessages = new Collection();
     }
 
     public function handle()
     {
         try {
-            $lockCollection = $this->packageManifest->collectManifestFromLock();
-            $autoloadCollection = $this->packageManifest->collectManifestFromComposerAutoload();
+            $errorMessages = $this->resolver->resolve($this->packageManifest);
 
-            $this->checkIfAutodiscoveredPackagesAreInLockfile($autoloadCollection, $lockCollection);
-            $this->checkIfLockedPackagesAreInAutoDiscovery($autoloadCollection, $lockCollection);
-
-            if (count($this->warningMessages) > 0) {
-                $this->warn('The lock file is not up to date with the autodiscovered packages.');
-                $this->line('Run `php artisan autodiscovery:generate-lock` to update the lock file.');
-                $this->line('The following packages are not in sync:');
-
-                $this->warningMessages->each(function ($message) {
-                    $this->warn($message);
-                });
-
-                throw new \Exception('A missmatch between the lock file and the autodiscovered packages was found.');
-            } else {
+            if ($errorMessages->isEmpty()) {
                 $this->info('The lock file is up to date with the autodiscovered packages.');
+
+                return self::SUCCESS;
             }
-            return self::SUCCESS;
+
+            $this->warn('The lock file is not up to date with the autodiscovered packages.');
+            $this->line('Run `php artisan autodiscovery:generate-lock` to update the lock file.');
+            $this->line('The following packages are not in sync:');
+
+            $this->warningMessages->each(function ($message) {
+                $this->warn($message);
+            });
+
+            throw new \Exception('A mismatch between the lock file and the autodiscovered packages was found.');
+
         } catch (\Exception $e) {
             $this->error('The lockfile  file did not verify: ' . $e->getMessage());
 
             return self::FAILURE;
         }
-    }
-
-    private function checkIfLockedPackagesAreInAutoDiscovery(Collection $lockCollection, Collection $autoloadCollection): void
-    {
-        $warningMessages = $this->warningMessages;
-        $lockCollection->flatten()->diff($autoloadCollection->flatten())->each(function ($item) use ($warningMessages) {
-            $warningMessages[] = $item . ' is found in the lock file but not in the autodiscovered packages.';
-        });
-    }
-
-    private function checkIfAutodiscoveredPackagesAreInLockfile(Collection $lockCollection, Collection $autoloadCollection): void
-    {
-        $warningMessages = $this->warningMessages;
-        $autoloadCollection->flatten()->diff($lockCollection->flatten())->each(function ($item) use ($warningMessages) {
-            $warningMessages[] = $item . ' is found in the autodiscovered packages but not in the lock file.';
-        });
     }
 }
