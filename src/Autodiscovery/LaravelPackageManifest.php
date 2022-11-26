@@ -9,9 +9,9 @@ class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
 {
     public const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
 
-    public function getManifest(): array
+    public function fetchManifest(): Collection
     {
-        return parent::getManifest();
+        return collect(parent::getManifest());
     }
 
     public function getLockFilePath(): string
@@ -21,14 +21,14 @@ class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
 
     public function collectManifestFromComposerAutoload(): Collection
     {
-        $manifest = $this->getManifest();
+        $manifest = $this->fetchManifest();
 
-        if (is_iterable($manifest) === false || count($manifest)  === 0) {
+        if ($manifest->isEmpty()) {
             throw new \Exception('No packages found in the manifest.');
         }
 
         return collect([
-            'autodiscovered_packages' => $this->getManifest(),
+            'autodiscovered_packages' => $manifest,
         ]);
     }
 
