@@ -38,19 +38,8 @@ final class ResolveResult
         return $this->notInLock;
     }
 
-
-    public function setNotInLock(Collection $notInLock): void
-    {
-        $this->notInLock = $notInLock;
-    }
-
     public function getNotInAutoload(): Collection
     {
         return $this->notInAutoload;
-    }
-
-    public function setNotInAutoload(Collection $notInAutoload): void
-    {
-        $this->notInAutoload = $notInAutoload;
     }
 }
