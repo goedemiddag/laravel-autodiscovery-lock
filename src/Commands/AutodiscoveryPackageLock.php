@@ -21,11 +21,11 @@ class AutodiscoveryPackageLock extends Command
         $this->packageManifest = new LaravelPackageManifest(
             $manifest->files,
             $manifest->basePath,
-            $manifest->manifestPath
+            $manifest->manifestPath ?? ''
         );
     }
 
-    public function handle()
+    public function handle(): int
     {
         try {
             $collection = $this->packageManifest->collectManifestFromComposerAutoload();

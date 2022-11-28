@@ -2,10 +2,11 @@
 
 namespace Goedemiddag\AutodiscoveryLock\Autodiscovery;
 
-use Illuminate\Filesystem\Filesystem;
+use Exception;
+use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\Collection;
 
-class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
+class LaravelPackageManifest extends PackageManifest
 {
     public const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
 
@@ -24,7 +25,7 @@ class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
         $manifest = $this->fetchManifest();
 
         if ($manifest->isEmpty()) {
-            throw new \Exception('No packages found in the manifest.');
+            throw new Exception('No packages found in the manifest.');
         }
 
         return collect([
@@ -36,6 +37,16 @@ class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
     {
         $lockFile = $this->files->get($this->getLockFilePath());
 
-        return collect(json_decode($lockFile, true));
+        $collection = json_decode($lockFile, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('The autodiscovery lock file is not valid JSON.');
+        }
+
+        return collect(
+            [
+               'autodiscovered_packages' =>  $collection
+            ]
+        );
     }
 }

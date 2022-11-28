@@ -23,35 +23,31 @@ class AutodiscoveryPackageLockVerify extends Command
         $this->packageManifest = new LaravelPackageManifest(
             $manifest->files,
             $manifest->basePath,
-            $manifest->manifestPath
+            $manifest->manifestPath ?? ''
         );
         $this->resolver = $resolver;
     }
 
-    public function handle()
+    public function handle(): int
     {
         try {
-            $errorMessages = $this->resolver->resolve($this->packageManifest);
+            $result = $this->resolver->resolve($this->packageManifest);
 
-            if (
-                $errorMessages->get(AutodiscoveryLockResolver::NOT_IN_AUTOLOAD)->isEmpty() &&
-                $errorMessages->get(AutodiscoveryLockResolver::NOT_IN_LOCK)->isEmpty()
-            ) {
+            if ($result->hasNoMismatches()) {
                 $this->info('The lock file is up to date with the autodiscovered packages.');
 
                 return self::SUCCESS;
             }
+
             $this->warn('The lock file is not up to date with the autodiscovered packages.');
-
-            $this->displayNotInAutoloadMessages($errorMessages->get(AutodiscoveryLockResolver::NOT_IN_AUTOLOAD));
-            $this->displayNotInLockMessages($errorMessages->get(AutodiscoveryLockResolver::NOT_IN_LOCK));
-
-            throw new \Exception('A mismatch between the lock file and the autodiscovered packages was found.');
+            $this->displayNotInAutoloadMessages($result->getNotInAutoload());
+            $this->displayNotInLockMessages($result->getNotInLock());
+            $this->error('A mismatch between the lock file and the autodiscovered packages was found.');
         } catch (\Exception $e) {
-            $this->error('The lockfile  file did not verify: ' . $e->getMessage());
-
-            return self::FAILURE;
+            $this->error('Could not verify lock file: ' . $e->getMessage());
         }
+
+        return self::FAILURE;
     }
 
     private function displayNotInLockMessages(Collection $errorMessages): void
