@@ -2,16 +2,19 @@
 
 namespace Goedemiddag\AutodiscoveryLock\Autodiscovery;
 
-use Illuminate\Filesystem\Filesystem;
+use Exception;
+use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\Collection;
+use InvalidLockException;
+use InvalidManifestException;
 
-class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
+class LaravelPackageManifest extends PackageManifest
 {
     public const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
 
-    public function getManifest(): array
+    public function fetchManifest(): Collection
     {
-        return parent::getManifest();
+        return collect(parent::getManifest());
     }
 
     public function getLockFilePath(): string
@@ -21,14 +24,14 @@ class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
 
     public function collectManifestFromComposerAutoload(): Collection
     {
-        $manifest = $this->getManifest();
+        $manifest = $this->fetchManifest();
 
-        if (is_iterable($manifest) === false || count($manifest)  === 0) {
-            throw new \Exception('No packages found in the manifest.');
+        if ($manifest->isEmpty()) {
+            throw InvalidManifestException::autoDiscoveryIsEmpty();
         }
 
         return collect([
-            'autodiscovered_packages' => $this->getManifest(),
+            'autodiscovered_packages' => $manifest,
         ]);
     }
 
@@ -36,6 +39,16 @@ class LaravelPackageManifest extends \Illuminate\Foundation\PackageManifest
     {
         $lockFile = $this->files->get($this->getLockFilePath());
 
-        return collect(json_decode($lockFile, true));
+        $collection = json_decode($lockFile, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw InvalidLockException::lockIsInvalid();
+        }
+
+        return collect(
+            [
+               'autodiscovered_packages' =>  $collection
+            ]
+        );
     }
 }

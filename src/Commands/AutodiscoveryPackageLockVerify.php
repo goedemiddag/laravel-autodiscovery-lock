@@ -2,6 +2,7 @@
 
 namespace Goedemiddag\AutodiscoveryLock\Commands;
 
+use Goedemiddag\AutodiscoveryLock\Autodiscovery\AutodiscoveryLockResolver;
 use Goedemiddag\AutodiscoveryLock\Autodiscovery\LaravelPackageManifest;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\PackageManifest;
@@ -12,66 +13,62 @@ class AutodiscoveryPackageLockVerify extends Command
     protected $signature = 'autodiscovery:verify-lock';
     protected $description = 'verify that the lockfile on disk is the same as the autodiscovered packages';
 
-    private const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
+    private LaravelPackageManifest $packageManifest;
+    private AutodiscoveryLockResolver $resolver;
 
-    private PackageManifest $packageManifest;
-    private Collection  $warningMessages;
-
-    public function __construct(PackageManifest $manifest)
+    public function __construct(PackageManifest $manifest, AutodiscoveryLockResolver $resolver)
     {
         parent::__construct();
 
         $this->packageManifest = new LaravelPackageManifest(
             $manifest->files,
             $manifest->basePath,
-            $manifest->manifestPath
+            $manifest->manifestPath ?? ''
         );
-        $this->warningMessages = new Collection();
+        $this->resolver = $resolver;
     }
 
-    public function handle()
+    public function handle(): int
     {
         try {
-            $lockCollection = $this->packageManifest->collectManifestFromLock();
-            $autoloadCollection = $this->packageManifest->collectManifestFromComposerAutoload();
+            $result = $this->resolver->resolve($this->packageManifest);
 
-            $this->checkIfAutodiscoveredPackagesAreInLockfile($autoloadCollection, $lockCollection);
-            $this->checkIfLockedPackagesAreInAutoDiscovery($autoloadCollection, $lockCollection);
-
-            if (count($this->warningMessages) > 0) {
-                $this->warn('The lock file is not up to date with the autodiscovered packages.');
-                $this->line('Run `php artisan autodiscovery:generate-lock` to update the lock file.');
-                $this->line('The following packages are not in sync:');
-
-                $this->warningMessages->each(function ($message) {
-                    $this->warn($message);
-                });
-
-                throw new \Exception('A missmatch between the lock file and the autodiscovered packages was found.');
-            } else {
+            if ($result->hasNoMismatches()) {
                 $this->info('The lock file is up to date with the autodiscovered packages.');
-            }
-            return self::SUCCESS;
-        } catch (\Exception $e) {
-            $this->error('The lockfile  file did not verify: ' . $e->getMessage());
 
-            return self::FAILURE;
+                return self::SUCCESS;
+            }
+
+            $this->warn('The lock file is not up to date with the autodiscovered packages.');
+            $this->displayNotInAutoloadMessages($result->getNotInAutoload());
+            $this->displayNotInLockMessages($result->getNotInLock());
+            $this->error('A mismatch between the lock file and the autodiscovered packages was found.');
+        } catch (\Exception $e) {
+            $this->error('Could not verify lock file: ' . $e->getMessage());
+        }
+
+        return self::FAILURE;
+    }
+
+    private function displayNotInLockMessages(Collection $errorMessages): void
+    {
+        if ($errorMessages->isNotEmpty()) {
+            $this->warn('The following classes are in the lock file but not in the autodiscovered packages:');
+
+            $errorMessages->each(function ($item) {
+                $this->line('- ' . $item);
+            });
         }
     }
 
-    private function checkIfLockedPackagesAreInAutoDiscovery(Collection $lockCollection, Collection $autoloadCollection): void
+    private function displayNotInAutoloadMessages(Collection $errorMessages): void
     {
-        $warningMessages = $this->warningMessages;
-        $lockCollection->flatten()->diff($autoloadCollection->flatten())->each(function ($item) use ($warningMessages) {
-            $warningMessages[] = $item . ' is found in the lock file but not in the autodiscovered packages.';
-        });
-    }
+        if ($errorMessages->isNotEmpty()) {
+            $this->warn('The following classes are in the autodiscovered packages but not in the lock file:');
 
-    private function checkIfAutodiscoveredPackagesAreInLockfile(Collection $lockCollection, Collection $autoloadCollection): void
-    {
-        $warningMessages = $this->warningMessages;
-        $autoloadCollection->flatten()->diff($lockCollection->flatten())->each(function ($item) use ($warningMessages) {
-            $warningMessages[] = $item . ' is found in the autodiscovered packages but not in the lock file.';
-        });
+            $errorMessages->each(function ($item) {
+                $this->line('- ' . $item);
+            });
+        }
     }
 }

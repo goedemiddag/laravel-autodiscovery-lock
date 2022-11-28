@@ -1,0 +1,5 @@
+parameters:
+    level: 9
+    checkGenericClassInNonGenericObjectType: false  # disable this check until Collections are no longer used
+    paths:
+        - src
