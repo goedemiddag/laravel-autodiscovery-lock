@@ -6,18 +6,14 @@ use Illuminate\Support\Collection;
 
 final class AutodiscoveryLockResolver
 {
-    public const NOT_IN_LOCK = 'notInLock';
-    public const NOT_IN_AUTOLOAD = 'notInAutoload';
-    public function resolve(LaravelPackageManifest $manifest): Collection
+    public function resolve(LaravelPackageManifest $manifest): ResolveResult
     {
         $autoload = $manifest->collectManifestFromComposerAutoload();
         $lock = $manifest->collectManifestFromLock();
 
-        return collect(
-            [
-                self::NOT_IN_LOCK => $this->getClassesInAutoloadMissingFromLockfile($lock, $autoload),
-                self::NOT_IN_AUTOLOAD => $this->getClassesInLockfileMissingFromAutoload($lock, $autoload),
-            ]
+        return new ResolveResult(
+            $this->getClassesInAutoloadMissingFromLockfile($lock, $autoload),
+            $this->getClassesInLockfileMissingFromAutoload($lock, $autoload),
         );
     }
 
