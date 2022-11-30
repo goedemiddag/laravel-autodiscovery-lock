@@ -10,7 +10,7 @@ use InvalidManifestException;
 
 class LaravelPackageManifest extends PackageManifest
 {
-    public const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
+    final public const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
 
     public function fetchManifest(): Collection
     {
