@@ -2,7 +2,6 @@
 
 namespace Goedemiddag\AutodiscoveryLock\Autodiscovery;
 
-use Exception;
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\Collection;
 use InvalidLockException;
