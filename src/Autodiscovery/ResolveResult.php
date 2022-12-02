@@ -6,21 +6,13 @@ use Illuminate\Support\Collection;
 
 final class ResolveResult
 {
-    private Collection $notInLock;
-
-    private Collection $notInAutoload;
-
-    public function __construct(
-        Collection $notInLock,
-        Collection $notInAutoload,
-    ) {
-        $this->notInLock = $notInLock;
-        $this->notInAutoload = $notInAutoload;
+    public function __construct(private readonly Collection $notInLock, private readonly Collection $notInAutoload)
+    {
     }
 
     public function hasNoMismatches(): bool
     {
-        return $this->hasPackagesNotInAutoload() === false && $this->hasPackagesNotInLock() === false;
+        return !$this->hasPackagesNotInAutoload() && !$this->hasPackagesNotInLock();
     }
 
     public function hasPackagesNotInLock(): bool

@@ -13,10 +13,9 @@ class AutodiscoveryPackageLockVerify extends Command
     protected $signature = 'autodiscovery:verify-lock';
     protected $description = 'verify that the lockfile on disk is the same as the autodiscovered packages';
 
-    private LaravelPackageManifest $packageManifest;
-    private AutodiscoveryLockResolver $resolver;
+    private readonly LaravelPackageManifest $packageManifest;
 
-    public function __construct(PackageManifest $manifest, AutodiscoveryLockResolver $resolver)
+    public function __construct(PackageManifest $manifest, private readonly AutodiscoveryLockResolver $resolver)
     {
         parent::__construct();
 
@@ -25,7 +24,6 @@ class AutodiscoveryPackageLockVerify extends Command
             $manifest->basePath,
             $manifest->manifestPath ?? ''
         );
-        $this->resolver = $resolver;
     }
 
     public function handle(): int
