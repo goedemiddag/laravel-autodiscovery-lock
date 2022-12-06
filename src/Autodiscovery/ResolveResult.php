@@ -6,7 +6,10 @@ use Illuminate\Support\Collection;
 
 final class ResolveResult
 {
-    public function __construct(private readonly Collection $notInLock, private readonly Collection $notInAutoload)
+    public function __construct(
+        private readonly Collection $notInLock,
+        private readonly Collection $notInAutoload
+    )
     {
     }
 
