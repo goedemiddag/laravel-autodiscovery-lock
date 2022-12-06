@@ -20,9 +20,9 @@ class AutodiscoveryPackageLockVerify extends Command
         parent::__construct();
 
         $this->packageManifest = new LaravelPackageManifest(
-            $manifest->files,
-            $manifest->basePath,
-            $manifest->manifestPath ?? ''
+            files: $manifest->files,
+            basePath: $manifest->basePath,
+            manifestPath: $manifest->manifestPath ?? ''
         );
     }
 
