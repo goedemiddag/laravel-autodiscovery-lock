@@ -10,7 +10,8 @@ First of all, thanks for taking the time to contribute 🎉
   - `git fetch upstream`
   - `git rebase upstream/main`
   - `git push origin main --force-with-lease`
-- Early and unfinished pull requests are encouraged. This means the changes can be discussed and changes can be suggested where needed. Please make sure to prefix the title with "WIP:"
+- Early and unfinished pull requests are encouraged. This means the changes can be discussed and changes can be suggested where needed. Please make sure to mark the pull request as draft in that case. 
+- 
 - Make sure the tests pass once you mark your pull request as finished
 
 ## Commit messages and pull request titles
