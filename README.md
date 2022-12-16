@@ -48,6 +48,12 @@ Just run the command in the pipeline for your Pull Requests, and/or run the comm
 ## Pipeline examples
 TBD
 
+## Contributing
+
+Found a bug or want to add a new feature? Great! There are also many other ways to make meaningful contributions such as reviewing outstanding pull requests and writing documentation. Even opening an issue for a bug you found is appreciated.
+
+If you would like to contribute code, please see our [contributing guide](CONTRIBUTING.md)
+
 ## Credits 
 - [Bonroyage](https://github.com/bonroyage) - For helping out with the initial implementation.
 - [NiekKeijzer](https://github.com/NiekKeijzer) - For reviewing the code for the initial implementation.
