@@ -25,6 +25,11 @@ jobs:
       - name: Install Dependencies
         run: |
           composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress
+
       - name: Execute static analysis via phpstan
         run: |
           vendor/bin/phpstan
+
+      - name: Execute tests via phpunit
+        run: |
+              vendor/bin/phpunit
