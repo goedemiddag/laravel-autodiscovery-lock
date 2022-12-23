@@ -1,16 +1,17 @@
 <?php
 
 use Goedemiddag\AutodiscoveryLock\Autodiscovery\ResolveResult;
+use Illuminate\Support\Collection;
 
 final class ResolveResultTest extends \PHPUnit\Framework\TestCase
 {
     public function testWithoutMismatches(): void
     {
         $result = new ResolveResult(
-            new \Illuminate\Support\Collection(
+            new Collection(
                 []
             ),
-            new \Illuminate\Support\Collection(
+            new Collection(
                 []
             ),
         );
@@ -26,13 +27,13 @@ final class ResolveResultTest extends \PHPUnit\Framework\TestCase
     public function testWithMismatches(): void
     {
         $result = new ResolveResult(
-            new \Illuminate\Support\Collection(
+            new Collection(
                 [
                     'foo',
                     'bar',
                 ]
             ),
-            new \Illuminate\Support\Collection(
+            new Collection(
                 [
                     'baz',
                     'qux',
