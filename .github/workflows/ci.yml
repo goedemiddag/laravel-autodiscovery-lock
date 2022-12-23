@@ -32,4 +32,4 @@ jobs:
 
       - name: Execute tests via phpunit
         run: |
-              vendor/bin/phpunit
+          vendor/bin/phpunit
