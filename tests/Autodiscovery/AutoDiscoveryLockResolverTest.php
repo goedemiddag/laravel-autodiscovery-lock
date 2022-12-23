@@ -5,78 +5,96 @@ use Illuminate\Support\Collection;
 
 final class AutoDiscoveryLockResolverTest extends \PHPUnit\Framework\TestCase
 {
-    public function testClassesMissingFromAutoload()
+    public function testGetClassesInLockfileMissingFromAutoload(): void
     {
-        $lock = new Collection([
-            'App\\Providers\\AppServiceProvider',
-            'App\\Providers\\EventServiceProvider',
-            'App\\Providers\\RouteServiceProvider',
-        ]);
-
-        $autoload = new Collection([
-            'App\\Providers\\AppServiceProvider',
-            'App\\Providers\\EventServiceProvider',
-        ]);
-
         $resolver = new AutodiscoveryLockResolver();
 
-        $result = $resolver->resolve($lock, $autoload);
+        $lockCollection = new Collection(
+            [
+                'foo',
+                'bar',
+            ]
+        );
 
-        $this->assertTrue($result->hasPackagesNotInAutoload());
-        $this->assertFalse($result->hasPackagesNotInLock());
+        $autoloadCollection = new Collection(
+            [
+                'baz',
+                'qux',
+            ]
+        );
+
+        $result = $resolver->getClassesInLockfileMissingFromAutoload($lockCollection, $autoloadCollection);
+
         $this->assertEquals(
-            new Collection([
-                'App\\Providers\\RouteServiceProvider',
-            ]),
-            $result->getNotInAutoload()
+            new Collection(
+                [
+                    'foo',
+                    'bar',
+                ]
+            ),
+            $result
         );
     }
 
-    public function testClassesMissingFromLock()
+    public function testGetClassesInAutoloadMissingFromLockfile(): void
     {
-        $lock = new Collection([
-            'App\\Providers\\AppServiceProvider',
-            'App\\Providers\\EventServiceProvider',
-        ]);
-
-        $autoload = new Collection([
-            'App\\Providers\\AppServiceProvider',
-            'App\\Providers\\EventServiceProvider',
-            'App\\Providers\\RouteServiceProvider',
-        ]);
-
         $resolver = new AutodiscoveryLockResolver();
 
-        $result = $resolver->resolve($lock, $autoload);
+        $lockCollection = new Collection(
+            [
+                'foo',
+                'bar',
+            ]
+        );
 
-        $this->assertFalse($result->hasPackagesNotInAutoload());
-        $this->assertTrue($result->hasPackagesNotInLock());
+        $autoloadCollection = new Collection(
+            [
+                'baz',
+                'qux',
+            ]
+        );
+
+        $result = $resolver->getClassesInAutoloadMissingFromLockfile($lockCollection, $autoloadCollection);
+
         $this->assertEquals(
-            new Collection([
-                'App\\Providers\\RouteServiceProvider',
-            ]),
-            $result->getNotInLock()
+            new Collection(
+                [
+                    'baz',
+                    'qux',
+                ]
+            ),
+            $result
         );
     }
 
-    public function testNoMismatches()
+    public function testWithNothingMissing(): void
     {
-        $lock = new Collection([
-            'App\\Providers\\AppServiceProvider',
-            'App\\Providers\\EventServiceProvider',
-        ]);
-
-        $autoload = new Collection([
-            'App\\Providers\\AppServiceProvider',
-            'App\\Providers\\EventServiceProvider',
-        ]);
-
         $resolver = new AutodiscoveryLockResolver();
 
-        $result = $resolver->resolve($lock, $autoload);
+        $lockCollection = new Collection(
+            [
+                'foo',
+                'bar',
+            ]
+        );
 
-        $this->assertFalse($result->hasPackagesNotInAutoload());
-        $this->assertFalse($result->hasPackagesNotInLock());
-        $this->assertTrue($result->hasNoMismatches());
+        $autoloadCollection = new Collection(
+            [
+                'foo',
+                'bar',
+            ]
+        );
+
+        // assert no mismatches are found from Lockfile
+        $this->assertEquals(
+            new Collection([]),
+            $resolver->getClassesInAutoloadMissingFromLockfile($lockCollection, $autoloadCollection)
+        );
+
+        // assert no mismatches are found from Autoload
+        $this->assertEquals(
+            new Collection([]),
+            $resolver->getClassesInLockfileMissingFromAutoload($lockCollection, $autoloadCollection)
+        );
     }
 }
