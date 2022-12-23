@@ -1,5 +1,6 @@
 <?php
 
+use Goedemiddag\AutodiscoveryLock\Autodiscovery\AutodiscoveryLockResolver;
 use Illuminate\Support\Collection;
 
 final class AutoDiscoveryLockResolverTest extends \PHPUnit\Framework\TestCase
