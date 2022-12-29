@@ -1,9 +1,12 @@
 <?php
 
+namespace Goedemiddag\AutodiscoveryLock\Tests\Autodiscovery;
+
 use Goedemiddag\AutodiscoveryLock\Autodiscovery\ResolveResult;
+use Goedemiddag\AutodiscoveryLock\Tests\TestCase;
 use Illuminate\Support\Collection;
 
-final class ResolveResultTest extends \PHPUnit\Framework\TestCase
+final class ResolveResultTest extends TestCase
 {
     public function testWithoutMismatches(): void
     {

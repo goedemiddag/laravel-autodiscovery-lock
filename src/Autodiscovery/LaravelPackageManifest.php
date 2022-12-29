@@ -6,11 +6,10 @@ use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\Collection;
 use InvalidLockException;
 use InvalidManifestException;
+use Symfony\Component\Filesystem\Path;
 
 class LaravelPackageManifest extends PackageManifest
 {
-    final public const PACKAGE_LOCK_FILE = 'autodiscovery.lock';
-
     public function fetchManifest(): Collection
     {
         return collect(parent::getManifest());
@@ -18,7 +17,10 @@ class LaravelPackageManifest extends PackageManifest
 
     public function getLockFilePath(): string
     {
-        return $this->basePath . DIRECTORY_SEPARATOR . self::PACKAGE_LOCK_FILE;
+        /** @var string $fileName */
+        $fileName = config('autodiscovery.lock_filename');
+
+        return Path::join($this->basePath, $fileName);
     }
 
     public function collectManifestFromComposerAutoload(): Collection
