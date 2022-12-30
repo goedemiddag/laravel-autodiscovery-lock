@@ -3,6 +3,7 @@
 namespace Goedemiddag\AutodiscoveryLock\Commands;
 
 use Goedemiddag\AutodiscoveryLock\Autodiscovery\LaravelPackageManifest;
+use Goedemiddag\AutodiscoveryLock\Factories\LaravelPackageManifestFactory;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\Collection;
@@ -14,15 +15,11 @@ class AutodiscoveryPackageLock extends Command
 
     private readonly LaravelPackageManifest $packageManifest;
 
-    public function __construct(PackageManifest $manifest)
+    public function __construct(PackageManifest $manifest, LaravelPackageManifestFactory $laravelPackageManifestFactory)
     {
         parent::__construct();
 
-        $this->packageManifest = new LaravelPackageManifest(
-            files: $manifest->files,
-            basePath: $manifest->basePath,
-            manifestPath: $manifest->manifestPath ?? ''
-        );
+        $this->packageManifest = $laravelPackageManifestFactory->build($manifest);
     }
 
     public function handle(): int

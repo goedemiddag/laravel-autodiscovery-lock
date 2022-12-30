@@ -1,9 +1,12 @@
 <?php
 
+namespace Goedemiddag\AutodiscoveryLock\Tests\Autodiscovery;
+
 use Goedemiddag\AutodiscoveryLock\Autodiscovery\AutodiscoveryLockResolver;
+use Goedemiddag\AutodiscoveryLock\Tests\TestCase;
 use Illuminate\Support\Collection;
 
-final class AutoDiscoveryLockResolverTest extends \PHPUnit\Framework\TestCase
+final class AutoDiscoveryLockResolverTest extends TestCase
 {
     public function testGetClassesInLockfileMissingFromAutoload(): void
     {
