@@ -8,16 +8,16 @@ use Illuminate\Support\ServiceProvider;
 
 class AutodiscoveryLockServiceProvider extends ServiceProvider
 {
+    protected const CONFIG_PATH = __DIR__ . '/../../config/autodiscovery.php';
+
     public function register(): void
     {
-        $configPath = __DIR__ . '/../../config/autodiscovery.php';
-        $this->mergeConfigFrom($configPath, 'autodiscovery');
+        $this->mergeConfigFrom(self::CONFIG_PATH, 'autodiscovery');
     }
 
     public function boot(): void
     {
-        $configPath = __DIR__ . '/../../config/autodiscovery.php';
-        $this->publishes([$configPath => config_path('autodiscovery.php.')], 'config');
+        $this->publishes([self::CONFIG_PATH => config_path('autodiscovery.php.')], 'config');
 
         if ($this->app->runningInConsole()) {
             $this->commands([
