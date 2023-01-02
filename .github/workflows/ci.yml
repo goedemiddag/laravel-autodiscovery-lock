@@ -33,3 +33,7 @@ jobs:
       - name: Execute tests via phpunit
         run: |
           vendor/bin/phpunit
+
+      - name: Check code style
+        run: |
+          vendor/bin/php-cs-fixer fix src --dry-run
