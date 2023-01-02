@@ -17,7 +17,7 @@ class AutodiscoveryLockServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->publishes([self::CONFIG_PATH => config_path('autodiscovery.php.')], 'config');
+        $this->publishes([self::CONFIG_PATH => config_path('autodiscovery.php')], 'config');
 
         if ($this->app->runningInConsole()) {
             $this->commands([
