@@ -36,4 +36,4 @@ jobs:
 
       - name: Check code style
         run: |
-          vendor/bin/php-cs-fixer fix src --dry-run
+          vendor/bin/php-cs-fixer fix --config .php-cs-fixer.php --dry-run
