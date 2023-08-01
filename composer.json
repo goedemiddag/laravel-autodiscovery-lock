@@ -1,7 +1,7 @@
 {
   "name": "goedemiddag/laravel-autodiscovery-lock",
   "description": "Creates a lock file containing all the packages which are auto-discovered by Laravel.",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "keywords": [
     "laravel",
     "autodiscovery",
